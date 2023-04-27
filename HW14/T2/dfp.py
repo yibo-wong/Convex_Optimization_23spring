@@ -86,13 +86,13 @@ if __name__ == "__main__":
     x0_2 = np.array([1.5, 1.0])
 
     fl = open("dfp_1.log", mode="w")
-    dfp = DFP(x0_1, H0.copy(), 0.8, 0.5, 1e-5)
+    dfp = DFP(x0_1, H0.copy(), 0.5, 0.5, 1e-5)
     dfp.start()
     dfp.plot("dfp_1")
     fl.close()
 
     fl = open("dfp_2.log", mode="w")
-    dfp = DFP(x0_2, H0.copy(), 0.8, 0.5, 1e-5)
+    dfp = DFP(x0_2, H0.copy(), 0.5, 0.5, 1e-5)
     dfp.start()
     dfp.plot("dfp_2")
     fl.close()
