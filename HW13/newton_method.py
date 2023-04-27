@@ -18,17 +18,10 @@ class Newton:
         return 100 * (x[1] - x[0] ** 2) ** 2 + (1 - x[0]) ** 2
 
     def df(self, x: np.array):
-        return np.array(
-            [2 * (x[0] - 1) + 400 * (x[0] ** 2 - x[1]) * x[0], 200 * (x[1] - x[0] ** 2)]
-        ).T
+        return np.array([2 * (x[0] - 1) + 400 * (x[0] ** 2 - x[1]) * x[0], 200 * (x[1] - x[0] ** 2)])
 
     def ddf(self, x: np.array):
-        return np.array(
-            [
-                [800 * x[0] ** 2 + 2 + 400 * (x[0] ** 2 - x[1]), -400 * x[0]],
-                [-400 * x[0], 200],
-            ]
-        )
+        return np.array([[800 * x[0] ** 2 + 2 + 400 * (x[0] ** 2 - x[1]), -400 * x[0]], [-400 * x[0], 200],])
 
     def rx(self, x: np.array):
         return np.array([10 * (x[1] - x[0] ** 2), (1 - x[0])])
@@ -98,9 +91,7 @@ class Newton:
             plt.show()
         else:
             plt.figure()
-            plt.plot(
-                range(len(self.f_his)), [np.log(i) for i in self.f_his], "o-", color="g"
-            )
+            plt.plot(range(len(self.f_his)), [np.log(i) for i in self.f_his], "o-", color="g")
             ax = plt.gca()
             ax.set_xlabel(f"steps:{len(self.f_his)-1}")
             ax.set_ylabel(r"$log(f(x)-p^*)$")
@@ -110,12 +101,14 @@ class Newton:
 
 if __name__ == "__main__":
     x0 = np.array([-2.0, 2.0])
-    damped_newton = Newton(x0, 0.5, 0.5, 1e-9)
+    damped_newton = Newton(x0, 0.5, 0.8, 1e-9)
     damped_newton.start("damped")
     damped_newton.plot("damped_newton")
     damped_newton.plot("damped_newton_time", time=1)
+    print("steps,", len(damped_newton.f_his)-1)
     x1 = np.array([-2.0, 2.0])
     gauss_newton = Newton(x1, 0.5, 0.5, 1e-9)
     gauss_newton.start("gauss")
     gauss_newton.plot("gauss_newton")
     gauss_newton.plot("gauss_newton_time", time=1)
+    print("steps,", len(gauss_newton.f_his)-1)

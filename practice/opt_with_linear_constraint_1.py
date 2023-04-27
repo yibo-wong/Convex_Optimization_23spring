@@ -60,9 +60,9 @@ class Opt:
         if self.iteTime > 100:
             return False
         return True
-    
+
     def newton_step(self):
-        
+        pass
 
     def start(self, method: str):
         if method == "direct":

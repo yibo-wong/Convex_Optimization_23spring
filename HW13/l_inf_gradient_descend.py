@@ -31,8 +31,7 @@ class Gradient:
         if dfdf < self.eta * self.eta:
             return False
         cur = self.f(self.x)
-        dx = np.zeros(df.shape)
-        dx[np.argmax(np.abs(df))] = -df[np.argmax(np.abs(df))]
+        dx = np.array([-float(np.sign(i)) for i in df])
 
         while self.f(self.x + t * dx) > cur + self.alpha * t * np.dot(dx, df):
             t = self.beta * t
@@ -61,7 +60,8 @@ class Gradient:
 
     def plot_step_length(self):
         plt.figure()
-        plt.plot(range(len(self.step_length_his)), self.step_length_his, color="g")
+        plt.plot(range(len(self.step_length_his)),
+                 self.step_length_his, color="g")
         ax = plt.gca()
         ax.set_xlabel(f"steps:{len(self.f_his)},log-scale y-axis")
         ax.set_ylabel(r"$||x_{k+1}-x_{k}||_2$")
@@ -85,9 +85,4 @@ def start(alpha, beta):
 
 
 if __name__ == "__main__":
-    # np.random.seed(2023)
-    # A = np.random.randn(3, 3)
-    # x0 = np.array([1.0, 1.0, 1.0]).T
-    # print(A @ x0)
-
-    start(0.5, 0.8)
+    start(0.3, 0.8)

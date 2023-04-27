@@ -53,7 +53,7 @@ class Gradient:
         ax.set_xlabel(f"steps:{len(self.f_his)}")
         ax.set_ylabel(r"$f(x)-p^*=\sum e^{a_i^Tx}+e^{-a_i^Tx}-p^*$")
         ax.set_yscale("log")
-        plt.savefig("function_value_descend.png",bbox_inches='tight')
+        plt.savefig("function_value_descend.png", bbox_inches='tight')
         plt.show()
 
     def plot_step_length(self):
@@ -63,7 +63,7 @@ class Gradient:
         ax.set_xlabel(f"steps:{len(self.f_his)}")
         ax.set_ylabel(r"$||x_{k+1}-x_{k}||_2$")
         ax.set_yscale("log")
-        plt.savefig("step_length_descend.png",bbox_inches='tight')
+        plt.savefig("step_length_descend.png", bbox_inches='tight')
         plt.show()
 
 
