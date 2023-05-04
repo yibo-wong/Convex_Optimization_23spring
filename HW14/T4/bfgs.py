@@ -204,14 +204,14 @@ if __name__ == "__main__":
     x0 = np.array([1.0, 1.0, 1.0])
 
     fl = open("dfp.log", mode="w")
-    dfp = DFP(x0.copy(), H0.copy(), 0.8, 0.5, 1e-5)
+    dfp = DFP(x0.copy(), H0.copy(), 0.8, 0.6, 1e-5)
     dfp.start()
     dfp.plot("dfp")
     dfp.plot_pos()
     fl.close()
 
     fl = open("bfgs.log", mode="w")
-    bfgs = BFGS(x0.copy(), H0.copy(), 0.8, 0.5, 1e-5)
+    bfgs = BFGS(x0.copy(), H0.copy(), 0.5, 0.5, 1e-5)
     bfgs.start()
     bfgs.plot("bfgs")
     bfgs.plot_pos()
