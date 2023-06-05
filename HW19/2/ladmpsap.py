@@ -85,8 +85,21 @@ class LADMAP:
             self.f_his.append(cur)
             print("step", self.steps)
             print("fx", cur)
-            self.step_Z()
-            self.step_E()
+            # self.step_Z()
+            # self.step_E()
+            E_1 = self.E.copy()
+            Z_1 = self.Z.copy()
+            # these two parts can be parallel
+            W = E_1 - (1 / (self.beta * self.eta2)) * self.A2.T @ (self.LAM + self.beta * (self.A1 @ Z_1 + self.A2 @ E_1 - self.B))
+            E = self.prox_2(W, self.beta * self.eta2)
+            self.dE = E-E_1
+            self.E = E.copy()
+
+            W = Z_1 - (1 / (self.beta * self.eta1)) * self.A1.T @ (self.LAM + self.beta * (self.A1 @ Z_1 + self.A2 @ E_1 - self.B))
+            Z = self.prox_1(W, self.beta * self.eta1)
+            self.dZ = Z-Z_1
+            self.Z = Z.copy()
+
             self.step_LAM()
             self.step_beta()
             self.set_criterion()

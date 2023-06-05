@@ -3,68 +3,52 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 
 
-class DA:
-    def __init__(
-        self, a: np.array, b: np.array, x0: np.array, y0: np.array, lam_0: np.array, alpha: float, beta: float, eta: float
-    ):
-        self.x = x0
-        self.y = y0
-        self.lam = lam_0
-        self.alpha = alpha
-        self.beta = beta
-        self.eta = eta
+class ADMM:
+    def __init__(self, a: np.array, b: np.array, x0: np.array, y0: np.array, lam_0: np.array, beta: float, tau: float):
+        self.x = x0.copy()
+        self.y = y0.copy()
+        self.lam = lam_0.copy()
         self.x_his = []
         self.f_his = []
         self.total_steps = 0
         self.a = a
         self.b = b
+        self.beta = beta
+        self.tau = tau
 
-    def f0(self, x: np.array, y: np.array):
+    def f(self, x: np.array, y: np.array):
         return np.linalg.norm(x-self.a, 2) + np.linalg.norm(y-self.b, 1)
 
-    def f(self, x: np.array, y: np.array, lam):
-        return np.linalg.norm(x-self.a, 2) + np.linalg.norm(y-self.b, 1)+np.dot(lam, (x-y))
+    def L(self, x: np.array, y: np.array, lam):
+        return np.linalg.norm(x-self.a, 2) + np.linalg.norm(y-self.b, 1) + np.dot(lam, (x-y)) + 0.5*self.beta*np.dot(x-y, x-y)
 
-    def f_x(self, x: np.array, lam):
-        return np.linalg.norm(x-self.a, 2)+np.dot(lam, x)
+    def L_y(self, y: np.array):
+        return np.linalg.norm(self.x-self.a, 2) + np.linalg.norm(y-self.b, 1) + np.dot(self.lam, (self.x-y)) + 0.5*self.beta*np.dot(self.x-y, self.x-y)
 
-    def f_y(self, y: np.array, lam):
-        return np.linalg.norm(y-self.b, 1)-np.dot(lam, y)
+    def step_x(self):
+        d = self.y - (self.lam)/self.beta - self.a
+        dist = np.linalg.norm(d, 2)
+        self.x = self.a + (dist-self.beta)*d/dist
 
-    def df_x(self, x: np.array, lam):
-        return (x-self.a)/np.linalg.norm(x-self.a, 2)+lam
-
-    def df_y(self, y: np.array, lam):
-        return np.sign(y-self.b)-lam
-
-    def step_f(self):
-        t = 1.0
-        dx = self.df_x(self.x, self.lam)
-        dy = self.df_y(self.y, self.lam)
-        dxdx = np.dot(dx, dx)
-        dydy = np.dot(dy, dy)
-        cur = self.f(self.x, self.y, self.lam)
-        while self.f(self.x - t * dx, self.y - t * dy, self.lam) > cur - self.alpha * t * (dxdx+dydy):
-            t = self.beta * t
-        self.x -= t * dx
-        self.y -= t * dy
-        if t*t*(dxdx+dydy) < self.eta:
-            return False
-        self.f_his.append(self.f0(self.x, self.y))
-        return True
+    def step_y(self):
+        result = optimize.minimize(self.L_y, self.y, options={"maxiter": 5})
+        self.y = result.x
 
     def step_lam(self):
-        self.lam += (self.x-self.y)
+        self.lam += self.tau*self.beta*(self.x-self.y)
 
-    def descend(self):
-        for i in range(100000):
-            while self.step_f():
-                # print(self.f(self.x, self.y, self.lam))
-                pass
+    def start(self):
+        while True:
+            self.step_x()
+            self.step_y()
             self.step_lam()
-            self.total_steps += 1
-            print("step: ", self.total_steps)
-            print(self.f0(self.x, self.y), "\n")
+            cur = self.f(self.x, self.y)
+            print("f:", cur)
+            self.f_his.append(cur)
+            constr = np.linalg.norm(self.x-self.y, 2)
+            print("c:", constr, "\n")
+            if abs(cur-f_opt) < eps1 and constr < eps2:
+                return
 
     def plot(self, name: str):
         plt.figure()
@@ -76,20 +60,23 @@ class DA:
         plt.show()
 
 
-np.random.seed(1919810)
-a = np.random.randn(100)
-b = np.random.randn(100)
-x0 = np.random.randn(100)
-y0 = np.random.randn(100)
-lam = np.array([0.0]*100)
+# def func(x: np.array):
+#     return np.linalg.norm(x-a, 2) + np.linalg.norm(x-b, 1)
 
 
-def func(x: np.array):
-    return np.linalg.norm(x-a, 2) + np.linalg.norm(x-b, 1)
+f_opt = 16.336948
+eps1 = 1e-5
+eps2 = 1e-8
 
 
-p = optimize.minimize(func, x0)
-print(p)
+if __name__ == "__main__":
+    np.random.seed(1919810)
+    a = np.random.randn(100)
+    b = np.random.randn(100)
+    x0 = np.random.randn(100)
+    y0 = np.random.randn(100)
+    lam = np.array([0.0]*100)
 
-# da = DA(a.copy(), b.copy(), x0.copy(), y0.copy(), lam, 0.5, 0.5, 1e-3)
-# da.descend()
+    admm = ADMM(a.copy(), b.copy(), x0.copy(), y0.copy(), lam.copy(), 0.01, 1.0)
+    admm.start()
+    admm.plot("ADMM")
