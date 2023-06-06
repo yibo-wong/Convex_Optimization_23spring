@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import optimize
+import time
 
 
 class ADMM:
@@ -31,8 +31,18 @@ class ADMM:
         self.x = self.a + (dist-self.beta)*d/dist
 
     def step_y(self):
-        result = optimize.minimize(self.L_y, self.y, options={"maxiter": 5})
-        self.y = result.x
+        b = self.x+self.lam/self.beta
+        y_hat = np.zeros_like(self.y)
+        a = self.b
+        coe = b-a
+        for i in range(100):
+            if coe[i] < -1/self.beta:
+                y_hat[i] = coe[i]+1/self.beta
+            elif coe[i] > 1/self.beta:
+                y_hat[i] = coe[i]-1/self.beta
+            else:
+                y_hat[i] = 0
+        self.y = y_hat+a
 
     def step_lam(self):
         self.lam += self.tau*self.beta*(self.x-self.y)
