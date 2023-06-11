@@ -139,8 +139,8 @@ if __name__ == "__main__":
     Z0 = np.zeros((300, 300))
     LAM0 = np.zeros((201, 300))
     beta = 0.0001
-    beta_m = 100
-    rho = 1.8
+    beta_m = 80
+    rho = 2.0
     eps1 = 1e-4
     eps2 = 1e-4
     ladmpsap = LADMPSAP(n, p, lam_coe, D0, Z0, E0, LAM0, beta, beta_m, rho, eps1, eps2)

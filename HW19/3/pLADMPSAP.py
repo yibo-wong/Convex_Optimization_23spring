@@ -5,7 +5,7 @@ import random
 
 np.random.seed(1919810)
 
-max_time = 10.0
+max_time = 30.0
 max_iter = 1000
 
 
@@ -42,7 +42,6 @@ class GD:
         t = self.line_search(self.w, d)
         self.w += t*d
         cur = self.f(self.w)
-        self.f_his.append(cur)
         self.steps += 1
         print("steps:", self.steps)
         print("f:", cur)
@@ -55,6 +54,10 @@ class GD:
             if end-start > max_time:
                 return
             self.t_his.append(end-start)
+            self.f_his.append(self.f(self.w))
+
+    def export_data(self, name: str):
+        return [name, self.f_his, self.t_his]
 
 
 class pLADMPSAP:
@@ -105,13 +108,10 @@ class pLADMPSAP:
         dw0 = (1 / self.tau0) * np.sum(self.LAM, axis=1)
         self.w0 += dw0
         for i in range(self.n):
-            # if i % 100 == 0:
-            #     print(i*100/self.n, "%")
             self.W[:, i] -= (1 / self.TAU[i]) * (self.LAM[:, i] + self.df_i(self.W[:, i], i))
             dLAM[:, i] = self.W[:, i] - w0
         self.LAM += self.beta * dLAM
         cur = self.f(self.w0)
-        self.f_his.append(cur)
         self.steps += 1
         print("steps:", self.steps)
         print("f:", cur)
@@ -122,11 +122,36 @@ class pLADMPSAP:
         while True:
             self.step()
             end = time.time()
-            if self.steps >= max_iter:
+            if end-start >= max_time:
                 return
             self.t_his.append(end-start)
+            self.f_his.append(self.f(self.w0))
+
+    def export_data(self, name: str):
+        return [name, self.f_his, self.t_his]
 
 # f: 0.5921396703288766
+
+
+class Plot:
+    def __init__(self) -> None:
+        self.name = []
+        self.f = []
+        self.t = []
+
+    def recv_data(self, obj):
+        self.name.append(obj[0])
+        self.f.append(obj[1])
+        self.t.append(obj[2])
+
+    def plot(self):
+        plt.figure()
+        for i in range(len(self.name)):
+            print(i)
+            plt.plot(self.t[i], self.f[i], label=self.name[i])
+        plt.legend()
+        plt.savefig("pLADMPSAP.png")
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -134,8 +159,13 @@ if __name__ == "__main__":
     y = np.random.randint(0, 2, size=500) * 2 - 1
     w = np.array([0.0]*100)
 
-    # gd = GD(100, 500, X.copy(), y.copy(), w.copy(), 0.4, 0.8)
-    # gd.start()
+    gd = GD(100, 500, X.copy(), y.copy(), w.copy(), 0.4, 0.8)
+    gd.start()
 
     plad = pLADMPSAP(100, 500, X.copy(), y.copy(), w.copy(), 0.001, 0.0001)
     plad.start()
+
+    plot = Plot()
+    plot.recv_data(gd.export_data("gd"))
+    plot.recv_data(plad.export_data("pLADMPSAP"))
+    plot.plot()

@@ -59,12 +59,20 @@
 ### 数值结果
 
 下图是目标函数值随迭代次数的曲线：
+
+
 ![图片](./1/LADMAP_f(x).png)
 
+
 下图是函数约束大小随着迭代次数的曲线（通过对约束的值取norm得到，可以看出来其趋于0）：
+
+
 ![图片](./1/LADMAP_constraint.png)
 
+
 下图是参数beta自动更新的曲线：
+
+
 ![图片](./1/LADMAP_beta.png)
 
 
@@ -79,24 +87,49 @@ LADPMPSAP许多步骤与LADMAP相似，如求proximal的部分以及更新lambda
 ### 数值结果
 
 下图是目标函数值随迭代次数的曲线：
+
+
 ![图片](./2/LADMPSAP_f(x).png)
 
 
 下图是函数约束大小随着迭代次数的曲线（通过对约束的值取norm得到，可以看出来其趋于0）：
+
+
 ![图片](./2/LADMPSAP_constraint.png)
 
 
 下图是参数beta自动更新的曲线：
+
+
 ![图片](./2/LADMPSAP_beta.png)
 
 
 ## problem 3: GD & pLADMPSAP for logistic regression
 
+首先是证明目标函数梯度的Lipschitz常数。该证明如下：
+
+
+![图片](./3/proof.jpg)
+
+此后，分别用梯度下降和pLADMPSAP法来优化目标函数。由于梯度下降法之前已经写过很多次，故不再赘述。
+
+将两种算法运行相同的时间，其结果如下：
+
+
+![图片](./3/pLADMPSAP.png)
+
+可以看出，梯度下降法在几次迭代之后就能收敛到最优值，而pLADMPSAP算法则要慢许多。然而，pLADMPSAP算法更适合大规模并行化计算，本问由于硬件原因只能写成串行版本，而在足够大的处理器上，可以将每次循环中的上百次迭代合并在一起运行，这样可以极大的提升算法速度。
+
+此外，梯度下降法的梯度计算和线搜索都是精确的，并且每一次计算并不需要过长时间，而pLADMPSAP方法则经过了很多步线性化近似处理，并且由于目标函数的原因，对每个分量计算梯度并未节省太多时间，因此并没有体现出算法的优势。
+
+
 ## problem 4: block coordinate descent for dictionary learning
 
 Block coordinate descent算法的特性，是每次对某些变量进行最小化处理，并循环这一过程。在这里，我将block选取为D的第i个纵向量和X的第i个横向量。
 
-在每次更新时，我使用k-SVD方法进行更新。关于这个算法的细节证明，可以见文章"K-SVD: An Algorithm for Designing Overcomplete Dictionaries for Sparse Representation". 该算法的大致思路为，如果固定其它变量，只对d_i和x_i进行优化的话，那么该优化存在closed form解，虽然该解需要用到SVD分解。
+在每次更新时，我使用k-SVD方法进行更新。关于这个算法的细节证明，可以见文章"K-SVD: An Algorithm for Designing Overcomplete Dictionaries for Sparse Representation". 该算法的大致思路为，如果固定其它变量，只对 d_i 和 x_i 进行优化的话，那么该优化存在closed form解。
+
+这个closed form形式解需要先对“残余”的矩阵进行SVD分解，然后 d_i 取一个特征向量，x_i 取一个特征向量乘以最大奇异值后做soft threshold之后的值，具体证明见上述文章（因为有点长，写不下）。
 
 具体的更新步骤可以见以下代码：
 ```python
@@ -125,6 +158,8 @@ Block coordinate descent算法的特性，是每次对某些变量进行最小�
 这是对第i个分量进行更新的代码，在具体进行运算时，主程序对i进行循环，从而循环更新各个变量。
 
 由于该迭代可以保证约束一直是紧的，因此这里只展示目标函数值随着迭代的曲线(该程序在每一轮循环中需要迭代400次，因此每轮循环都很慢。这里我们观察到迭代几轮后就会收敛)：
+
+
 ![图片](./4/bcd_dict.png)
 
 
@@ -156,9 +191,13 @@ Block coordinate descent算法的特性，是每次对某些变量进行最小�
 ```
 
 目标函数值随着迭代次数的曲线如下：
+
+
 ![图片](./5/bcd_low_rank.png)
 
 按照题目要求，做出“修复矩阵”A和“原矩阵”D的差异随着迭代次数的曲线，如下：
+
+
 ![图片](./5/bcd_low_rank_diff.png)
 
 两者都可以以稳定的速度趋于0，这意味着该算法可以很好的“复原”低秩矩阵，即使是在只知道原矩阵D的10%的元素的情况下。
@@ -177,6 +216,8 @@ while True:
 ```
 
 用流程图表示：
+
+
 ![图片](./6/chart.png)
 
 该算法会收敛到以下状态：
@@ -207,6 +248,8 @@ def step_x(self):
 ```
 
 其目标函数值随迭代次数的曲线如下：
+
+
 ![图片](./6/ppa.png)
 
 在该情境下，ppa收敛的非常迅速。
