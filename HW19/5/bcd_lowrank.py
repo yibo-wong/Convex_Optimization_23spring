@@ -32,13 +32,25 @@ class BCD:
         cur = self.f(self.U, self.V, self.A)
         self.f_his.append(cur)
         print("loss:", cur)
+        if diff < 0.1 and cur < 0.001:
+            return False
+        return True
 
     def start(self):
-        while True:
+        while self.step():
             self.steps += 1
-            self.step()
-            if self.steps > 2000:
-                return
+
+    def plot_f(self):
+        plt.figure()
+        plt.plot(range(len(self.f_his)), self.f_his, color="blue", linewidth=1)
+        plt.savefig("bcd_low_rank.png")
+        plt.show()
+
+    def plot_d(self):
+        plt.figure()
+        plt.plot(range(len(self.diff_his)), self.diff_his, color="green", linewidth=1)
+        plt.savefig("bcd_low_rank_diff.png")
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -53,3 +65,5 @@ if __name__ == "__main__":
         omega.append([x, y])
     bcd = BCD(D.copy(), omega.copy())
     bcd.start()
+    bcd.plot_f()
+    bcd.plot_d()

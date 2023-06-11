@@ -24,6 +24,8 @@ class LADMAP:
         self.eps1 = eps1
         self.eps2 = eps2
         self.f_his = []
+        self.c_his = []
+        self.b_his = []
         self.LAM = LAM
         self.dZ = np.zeros_like(self.Z)
         self.dE = np.zeros_like(self.E)
@@ -83,8 +85,12 @@ class LADMAP:
         while True:
             cur = self.f1(self.Z) + self.f2(self.E)
             self.f_his.append(cur)
+            constraint = np.linalg.norm(self.A1@self.Z + self.A2@self.E - self.B)
+            self.c_his.append(constraint)
+            self.b_his.append(self.beta)
             print("step", self.steps)
             print("fx", cur)
+            print("c:", constraint)
             self.step_Z()
             self.step_E()
             self.step_LAM()
@@ -93,6 +99,24 @@ class LADMAP:
             self.steps += 1
             if self.criteria_1 and self.criteria_2:
                 return
+
+    def plot_f(self):
+        plt.figure()
+        plt.plot(range(len(self.f_his)), self.f_his, color="blue", linewidth=1)
+        plt.savefig("LADMAP_f(x).png")
+        plt.show()
+
+    def plot_c(self):
+        plt.figure()
+        plt.plot(range(len(self.c_his)), self.c_his, color="green", linewidth=1)
+        plt.savefig("LADMAP_constraint.png")
+        plt.show()
+
+    def plot_b(self):
+        plt.figure()
+        plt.plot(range(len(self.b_his)), self.b_his, color="purple", linewidth=1)
+        plt.savefig("LADMAP_beta.png")
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -111,3 +135,6 @@ if __name__ == "__main__":
     eps2 = 1e-4
     ladmap = LADMAP(n, p, lam_coe, D0, Z0, E0, LAM0, beta, beta_m, rho, eps1, eps2)
     ladmap.start()
+    ladmap.plot_f()
+    ladmap.plot_c()
+    ladmap.plot_b()

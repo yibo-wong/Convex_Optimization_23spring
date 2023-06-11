@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-class LADMAP:
+class LADMPSAP:
     def __init__(self, n, p, lam_coe: float, D: np.array, Z0: np.array, E0: np.array, LAM: np.array, beta: float, beta_m: float, rho: float, eps1: float, eps2: float):
         self.n = n
         self.p = p
@@ -24,6 +24,8 @@ class LADMAP:
         self.eps1 = eps1
         self.eps2 = eps2
         self.f_his = []
+        self.c_his = []
+        self.b_his = []
         self.LAM = LAM
         self.dZ = np.zeros_like(self.Z)
         self.dE = np.zeros_like(self.E)
@@ -85,8 +87,9 @@ class LADMAP:
             self.f_his.append(cur)
             print("step", self.steps)
             print("fx", cur)
-            # self.step_Z()
-            # self.step_E()
+            constraint = np.linalg.norm(self.A1@self.Z + self.A2@self.E - self.B)
+            self.c_his.append(constraint)
+            self.b_his.append(self.beta)
             E_1 = self.E.copy()
             Z_1 = self.Z.copy()
             # these two parts can be parallel
@@ -107,6 +110,24 @@ class LADMAP:
             if self.criteria_1 and self.criteria_2:
                 return
 
+    def plot_f(self):
+        plt.figure()
+        plt.plot(range(len(self.f_his)), self.f_his, color="blue", linewidth=1)
+        plt.savefig("LADMPSAP_f(x).png")
+        plt.show()
+
+    def plot_c(self):
+        plt.figure()
+        plt.plot(range(len(self.c_his)), self.c_his, color="green", linewidth=1)
+        plt.savefig("LADMPSAP_constraint.png")
+        plt.show()
+
+    def plot_b(self):
+        plt.figure()
+        plt.plot(range(len(self.b_his)), self.b_his, color="purple", linewidth=1)
+        plt.savefig("LADMPSAP_beta.png")
+        plt.show()
+
 
 if __name__ == "__main__":
     np.random.seed(1919810)
@@ -122,5 +143,8 @@ if __name__ == "__main__":
     rho = 1.8
     eps1 = 1e-4
     eps2 = 1e-4
-    ladmap = LADMAP(n, p, lam_coe, D0, Z0, E0, LAM0, beta, beta_m, rho, eps1, eps2)
-    ladmap.start()
+    ladmpsap = LADMPSAP(n, p, lam_coe, D0, Z0, E0, LAM0, beta, beta_m, rho, eps1, eps2)
+    ladmpsap.start()
+    ladmpsap.plot_f()
+    ladmpsap.plot_c()
+    ladmpsap.plot_b()

@@ -47,8 +47,14 @@ class BCD:
                     print(i, " / 400")
                 self.step(i)
             self.steps += 1
-            if self.steps > 10:
+            if self.steps >= 5:
                 return
+
+    def plot_f(self):
+        plt.figure()
+        plt.plot(range(len(self.f_his)), self.f_his, color="blue", linewidth=1)
+        plt.savefig("bcd_dict.png")
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -57,3 +63,4 @@ if __name__ == "__main__":
     lam = 1.0
     bcd = BCD(Y.copy(), lam)
     bcd.start()
+    bcd.plot_f()

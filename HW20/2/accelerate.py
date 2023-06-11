@@ -6,7 +6,7 @@ import random
 np.random.seed(1919810)
 random.seed(1919810)
 
-max_time = 5
+max_time = 3.0
 
 
 class GD:
@@ -41,7 +41,6 @@ class GD:
         t = self.line_search(self.w, d)
         self.w += t*d
         cur = self.f(self.w)
-        self.f_his.append(cur)
         self.steps += 1
         print("steps:", self.steps)
         print("f:", cur)
@@ -54,6 +53,11 @@ class GD:
             if end-start > max_time:
                 return
             self.t_his.append(end-start)
+            cur = self.f(self.w)
+            self.f_his.append(cur)
+
+    def export_data(self, name: str):
+        return [name, self.f_his, self.t_his]
 
 
 class AGD:
@@ -86,7 +90,6 @@ class AGD:
         self.v = self.w-df/self.beta
         self.w = (1-self.gamma)*self.v+self.gamma*v_old
         cur = self.f(self.w)
-        self.f_his.append(cur)
         self.steps += 1
         print("steps:", self.steps)
         print("f:", cur)
@@ -99,7 +102,35 @@ class AGD:
             if end-start > max_time:
                 return
             self.t_his.append(end-start)
+            cur = self.f(self.w)
+            self.f_his.append(cur)
 
+    def export_data(self, name: str):
+        return [name, self.f_his, self.t_his]
+
+
+class Plot:
+    def __init__(self) -> None:
+        self.name = []
+        self.f = []
+        self.t = []
+
+    def recv_data(self, obj):
+        self.name.append(obj[0])
+        self.f.append(obj[1])
+        self.t.append(obj[2])
+
+    def plot(self):
+        plt.figure()
+        for i in range(len(self.name)):
+            plt.plot(self.t[i], [np.log(i-f_opt) for i in self.f[i]], label=self.name[i])
+            # plt.plot(self.t[i], self.f[i], label=self.name[i])
+        plt.legend()
+        plt.savefig("agd_vs_gd.png")
+        plt.show()
+
+
+f_opt = 0.639507576684830
 
 if __name__ == "__main__":
     X = np.random.randn(1000, 10000)
@@ -111,3 +142,8 @@ if __name__ == "__main__":
 
     agd = AGD(1000, 10000, X.copy(), y.copy(), w.copy())
     agd.start()
+
+    plot = Plot()
+    plot.recv_data(gd.export_data("gd"))
+    plot.recv_data(agd.export_data("agd"))
+    plot.plot()

@@ -40,8 +40,14 @@ class PPA:
             self.f_his.append(self.f())
             print("step:", self.steps)
             print("f:", self.f())
-            if self.steps > 100:
+            if self.steps >= 30:
                 return
+
+    def plot_f(self):
+        plt.figure()
+        plt.plot(range(len(self.f_his)), self.f_his, color="blue", linewidth=1)
+        plt.savefig("ppa.png")
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -49,3 +55,4 @@ if __name__ == "__main__":
     D0 = 5*np.random.randn(5)
     ppa = PPA(Y0, D0)
     ppa.start()
+    ppa.plot_f()

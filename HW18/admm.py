@@ -66,7 +66,7 @@ class ADMM:
         ax = plt.gca()
         ax.set_xlabel(f"steps:{len(self.f_his)}")
         ax.set_ylabel(r"$f(x)$")
-        plt.savefig(name+".png")
+        plt.savefig("./pics/"+name+".png")
         plt.show()
 
 
@@ -86,7 +86,8 @@ if __name__ == "__main__":
     x0 = np.random.randn(100)
     y0 = np.random.randn(100)
     lam = np.array([0.0]*100)
-
-    admm = ADMM(a.copy(), b.copy(), x0.copy(), y0.copy(), lam.copy(), 0.01, 1.0)
+    # beta=0.1, 0.01, 0.001
+    # tau=0.5, 1, 1.5
+    admm = ADMM(a.copy(), b.copy(), x0.copy(), y0.copy(), lam.copy(), 0.001, 1.5)
     admm.start()
-    admm.plot("ADMM")
+    admm.plot("ADMM_0.001_1.5")
